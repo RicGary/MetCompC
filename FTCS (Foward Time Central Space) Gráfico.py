@@ -76,6 +76,8 @@ def __FTSC__(TMAX, k, L, condicoes, otimizar=False):
     :return: Não retorna nada.
     """
 
+    dt = k
+
     import matplotlib.pyplot as plt
 
     if otimizar:
@@ -86,17 +88,22 @@ def __FTSC__(TMAX, k, L, condicoes, otimizar=False):
              'magenta', 'cyan', 'yellow',
              'black', 'orchid', 'gold', 'crimson')
 
-    f = [0 for _ in range(L)]
-    g = [0 for _ in range(L)]
     x = [i for i in range(L)]
 
-    # BC esquerda
-    f[0] = condicoes[0]
-    # BC direita
-    f[-1] = condicoes[1]
-
+    # cor -> Cor do gráfico | tmax -> Valor da lista TMAX
     for cor, tmax in enumerate(TMAX):
         tempo = 0
+
+        f = [0 for _ in range(L)]
+        g = [0 for _ in range(L)]
+
+        # Apenas para desempacotar as condições de contorno
+        indices = condicoes[0]
+        valores = condicoes[1]
+
+        # Condições de Contorno
+        for i in range(len(indices)):
+            f[indices[i]] = valores[i]
 
         while tempo < tmax:
 
@@ -107,7 +114,7 @@ def __FTSC__(TMAX, k, L, condicoes, otimizar=False):
                 f[i] = g[i]
 
             # D = 1
-            tempo += 0.4
+            tempo += dt
 
         plt.plot(x, f, color=CORES[cor], label=tmax)
 
@@ -117,7 +124,7 @@ def __FTSC__(TMAX, k, L, condicoes, otimizar=False):
     plt.title(f'Foward Time Central Space (FTCS) || L = {L} , k = {k}')
     plt.xlabel('x')
     plt.ylabel('f(x,t)')
-    plt.xticks([i for i in range(0, 100, 10)])
+    #plt.xticks([i for i in range(0, 100, 10)])
     plt.legend()
     plt.show()
 
@@ -127,10 +134,20 @@ if __name__ == '__main__':
     Local utilizado para testes de otimização.
     """
 
-    TMAX = (200, )
-    k = 0.4
+    TMAX = (0, 10, 50, 100, 500, 1000)
+    k = 0.25
     L = 100
-    condicoes = (1, 0)
+    # Exemplo 1
+    # esq = 1 | dir = 0
+    #condicoes = [[0, -1], [1, 0]]
 
-    __FTSC__(TMAX, k, L, condicoes, True)
+    m1 = L//4
+    m2 = 3*L//4
+
+    # Exemplo 2 || f(x = L/4..3 L/4, 0) = 1
+    # Logo: 100/4 = 25-1 = 24 || 300/4 = 75-1 = 74
+    # Como Funciona: [[indice1, indice2], [valor1, valor2]]
+    condicoes =[[int(x) for x in range(m1-1, m2)], [1 for _ in range(m1-1, m2)]]
+
+    __FTSC__(TMAX, k, L, condicoes)
 
